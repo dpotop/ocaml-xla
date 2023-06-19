@@ -27,6 +27,27 @@ tar -xzvf xla_extension-aarch64-darwin-cpu.tar.gz
 If the `xla_extension` directory is not in the main project directory, the path
 can be specified via the `XLA_EXTENSION_DIR` environment variable.
 
+## Compilation and execution instructions for MacOS on ARM64 (M1/M2) hardware
+The ```DYLD_LIBRARY_PATH```must be set to include  the ```xla_extension/lib``` folder.
+Then, at the first call, execution will fail, as the dynamic library is not legalized.
+To legalize it for the following calls, go to SystemPreferences/SecurityAndPrivacy 
+in the General tab and click to allow its execution.
+
+Note that by default the execution of the examples is set up on GPU.
+To allow execution on Mac's ARM hardware, only the CPU code will work. 
+The switch is performed in the applications themselves (the top-level
+OCaML code) where variable ```use_gpu``` must be set to ```false```.
+
+## Setting up dune for devel and debug
+OCaML's build manager dune can be pretty annoying, providing very little information on the operations it performs and transforming compilation warnings into errors. For this reason, I modified its configuration in two ways:
+### Global configuration
+The ```config``` file has been created and must be given in argument to dune, or placed in a location I did not yet identified (everything is complicated on a mac). To give it in argument to dune:
+
+```dune exec --config-file ./config examples/jacky.exe```
+
+### Example compilation config (examples/dune)
+I have added my new example to the file and I have modified the compilation options to avoid raising an error upon warnings, cf. https://stackoverflow.com/questions/57120927/how-to-disable-error-warning-66-unused-open-in-dune
+
 ## Generating some Text Samples with LLaMA
 
 The [LLaMA large language model](https://github.com/facebookresearch/llama) can
@@ -65,3 +86,4 @@ python examples/get_gpt2_weights.py
 # Run the example.
 dune exec examples/nanogpt.exe
 ```
+
