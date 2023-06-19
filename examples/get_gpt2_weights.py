@@ -5,6 +5,7 @@ import transformers
 
 model_name = "gpt2"
 model = transformers.GPT2LMHeadModel.from_pretrained(model_name)
+# model = transformers.TFGPT2LMHeadModel.from_pretrained(model_name)
 
 TRANSPOSED = set([
     "lm_head.weight"

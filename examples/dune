@@ -1,3 +1,17 @@
+; This makes the compiler not raise an error
+; upon various warning conditions.
+; Cf. https://stackoverflow.com/questions/57120927/how-to-disable-error-warning-66-unused-open-in-dune
+(env
+  (dev
+    (flags 
+      (:standard -w -66)
+      (:standard -w -26)
+      (:standard -w -32)
+    )
+  )
+)
+
+
 (executable
  (name basics)
  (modules basics)
@@ -15,6 +29,13 @@
 (executable
  (name nanogpt)
  (modules gpt2_tokenizer nanogpt)
+ (libraries xla base re yojson sexplib stdio uutf)
+ (preprocess
+  (pps ppx_inline_test ppx_expect ppx_sexp_conv ppx_sexp_message)))
+
+(executable
+ (name jacky)
+ (modules jacky)
  (libraries xla base re yojson sexplib stdio uutf)
  (preprocess
   (pps ppx_inline_test ppx_expect ppx_sexp_conv ppx_sexp_message)))

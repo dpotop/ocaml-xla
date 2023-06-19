@@ -1,0 +1,13 @@
+(lang dune 3.1)
+; This file must be given in argument to dune, or placed
+; in a location I did not yet identified. 
+; example: dune exec --config-file ./config examples/jacky.exe
+
+
+
+; print all commands it executes 
+; cf. https://dune.readthedocs.io/en/stable/dune-files.html
+(display verbose)
+
+; create as many jobs as there are cores
+(jobs auto)

@@ -11,66 +11,13 @@ open! Base
 module Element_type = Xla.Element_type
 module Literal = Xla.Literal
 module Op = Xla.Op
-module T = Gpt2_tokenizer
+
+
+let use_gpu = false
 
 let temperature = 0.8
-let use_gpu = false
-let num_samples = 10
-let sample_length = 100
+
 let failwith_s s = Sexp.to_string s |> failwith
-
-let start_prompt =
-  {|
-EDWARD:
-I wonder how our princely father 'scaped,
-Or whether he be 'scaped away or no
-From Clifford's and Northumberland's pursuit:
-Had he been ta'en, we should have heard the news;
-Had he been slain, we should have heard the news;
-Or had he 'scaped, methinks we should have heard
-The happy tidings of his good escape.
-How fares my brother? why is he so sad?
-
-RICHARD:
-I cannot joy, until I be resolved
-Where our right valiant father is become.
-I saw him in the battle range about;
-And watch'd him how he singled Clifford forth.
-Methought he bore him in the thickest troop
-As doth a lion in a herd of neat;
-Or as a bear, encompass'd round with dogs,
-Who having pinch'd a few and made them cry,
-The rest stand all aloof, and bark at him.
-So fared our father with his enemies;
-So fled his enemies my warlike father:
-Methinks, 'tis prize enough to be his son.
-See how the morning opes her golden gates,
-And takes her farewell of the glorious sun!
-How well resembles it the prime of youth,
-Trimm'd like a younker prancing to his love!
-
-EDWARD:
-Dazzle mine eyes, or do I see three suns?
-
-RICHARD:
-Three glorious suns, each one a perfect sun;
-Not separated with the racking clouds,
-But sever'd in a pale clear-shining sky.
-See, see! they join, embrace, and seem to kiss,
-As if they vow'd some league inviolable:
-Now are they but one lamp, one light, one sun.
-In this the heaven figures some event.
-
-EDWARD:
-'Tis wondrous strange, the like yet never heard of.
-I think it cites us, brother, to the field,
-That we, the sons of brave Plantagenet,
-Each one already blazing by our meeds,
-Should notwithstanding join our lights together
-And over-shine the earth as this the world.
-Whate'er it bodes, henceforward will I bear
-Upon my target three fair-shining suns.
-|}
 
 module VarStore : sig
   type t
@@ -374,6 +321,79 @@ let gpt_computation vs config ~b_sz =
     Op.div logits (Op.r0_f32 temperature ~builder) |> Op.softmax ~dim_index:(-1)
   in
   Xla.Computation.build ~root
+  
+let () =
+  (* 
+  let tokenizer = T.create ~merge_filename:"vocab.bpe" in
+  let start_tokens = T.encode tokenizer start_prompt |> Array.of_list in
+   *)
+  let client = Xla.Client.cpu() in
+  Stdio.printf "Platform name: %s\n" (Xla.Client.platform_name client);
+  Stdio.printf "Platform version: %s\n%!" (Xla.Client.platform_version client);
+  
+  (* let root = Op.div (Op.r0_f32 1.0 ~builder) (Op.r0_f32 2.0 ~builder) in *)
+  
+
+  
+  let exe1 =
+    let builder = Xla.Builder.create ~name:"exe1" in
+    let root = Op.div (Op.r0_f32 1.0 ~builder) (Op.parameter "tokens" ~id:0 ~ty:F32 ~dims:[| |] ~builder) in
+    let computation = Xla.Computation.build ~root in
+    Xla.Executable.compile client computation
+  and exe2 =
+    let builder = Xla.Builder.create ~name:"exe2" in
+    let root = Op.add (Op.r0_f32 1.0 ~builder) (Op.parameter "tokens" ~id:0 ~ty:F32 ~dims:[| |] ~builder) in
+    let computation = Xla.Computation.build ~root in
+    Xla.Executable.compile client computation
+  in
+  
+  for i = 1 to 10 do
+    (* Create some input values *)
+    let ba = Bigarray.Genarray.create Float32 C_layout [| |] in
+    Bigarray.Genarray.set ba [| |] (Float.of_int i)  ;
+
+    (* Execute exe1 *)
+    let out1 = Xla.Executable.execute exe1 [| Literal.of_bigarray ba |] in
+    let out1_0 = Xla.Buffer.to_literal_sync out1.(0).(0) in
+
+    (* Execute exe2 *)
+    let out2 = Xla.Executable.execute exe2 [| out1_0 |] in
+    let out2_0 = Xla.Buffer.to_literal_sync out2.(0).(0) in
+
+    (* Extract and print the output *)
+    let outbigarray = Literal.to_bigarray ~kind:Float32 out2_0 in
+    let value:float = Bigarray.Genarray.get outbigarray [| |] in
+    Stdio.printf "Value:%f\n" value
+  done
+
+    (*
+    let layout:int array = Bigarray.Genarray.dims outbigarray in
+    let arraystr:string =
+      let _aux (acc_str:string) (i:int) : string = acc_str^"; "^(Int.to_string i) in
+      Array.fold
+        layout
+        ~init:""
+        ~f:_aux
+        in
+     *)
+
+
+(*
+  (*
+  let vs = time_it "Read weight file" ~f:(fun () -> VarStore.create_npz "gpt2.npz") in
+  let gpt2 =
+    time_it "Generated the op" ~f:(fun () -> gpt_computation vs Config.gpt2 ~b_sz:1)
+  in
+  let exe =
+    time_it "Compiled the model" ~f:(fun () -> Xla.Executable.compile client gpt2)
+  in
+  for i = 1 to num_samples do
+    time_it "Sampled" ~f:(fun () ->
+      let sample = sample ~start_tokens ~tokenizer ~exe in
+      Stdio.printf "%d ----\n%s\n----\n%!" i sample)
+  done
+   *)
+
 
 let sample ~start_tokens ~tokenizer ~exe =
   let block_size = Config.gpt2.block_size in
@@ -415,25 +435,4 @@ let sample ~start_tokens ~tokenizer ~exe =
   done;
   Queue.to_list tokens |> T.decode tokenizer
 
-let () =
-  let tokenizer = T.create ~merge_filename:"vocab.bpe" in
-  let start_tokens = T.encode tokenizer start_prompt |> Array.of_list in
-  let client =
-    if use_gpu
-    then Xla.Client.gpu ~memory_fraction:0.95 ~preallocate:false
-    else Xla.Client.cpu ()
-  in
-  Stdio.printf "Platform name: %s\n" (Xla.Client.platform_name client);
-  Stdio.printf "Platform version: %s\n%!" (Xla.Client.platform_version client);
-  let vs = time_it "Read weight file" ~f:(fun () -> VarStore.create_npz "gpt2.npz") in
-  let gpt2 =
-    time_it "Generated the op" ~f:(fun () -> gpt_computation vs Config.gpt2 ~b_sz:1)
-  in
-  let exe =
-    time_it "Compiled the model" ~f:(fun () -> Xla.Executable.compile client gpt2)
-  in
-  for i = 1 to num_samples do
-    time_it "Sampled" ~f:(fun () ->
-      let sample = sample ~start_tokens ~tokenizer ~exe in
-      Stdio.printf "%d ----\n%s\n----\n%!" i sample)
-  done
+ *)

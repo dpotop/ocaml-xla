@@ -1,0 +1,16 @@
+## MACOS users on M1
+* set DYLD_LIBRARY_PATH to include the xla_extension/lib folder
+* legalize the dynamic library in the system preferences/security and privacy tab (once it has been rejected once, it appears there).
+
+## CUDA GPU vs CPU
+On machines without CUDA, don't forget to disable GPU usage in the application.
+
+## dune configuration
+To facilitate my work, I have modified the configuration of the dune build manager at several levels:
+### Global configuration
+The ```config``` file has been created and must be given in argument to dune, or placed in a location I did not yet identified (everything is complicated on a mac). To give it in argument to dune:
+
+```dune exec --config-file ./config examples/jacky.exe```
+
+## example compilation config (examples/dune)
+I have added my new example to the file and I have modified the compilation options to avoid raising an error upon warnings, cf. https://stackoverflow.com/questions/57120927/how-to-disable-error-warning-66-unused-open-in-dune

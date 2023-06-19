@@ -2,12 +2,12 @@ open Base
 module C = Configurator.V1
 
 let empty_flags = { C.Pkg_config.cflags = []; libs = [] }
-let ( /^ ) = Caml.Filename.concat
-let file_exists = Caml.Sys.file_exists
+let ( /^ ) = Stdlib.Filename.concat
+let file_exists = Stdlib.Sys.file_exists
 
 let xla_flags () =
   let config ~lib_dir =
-    let cflags = [ "-isystem"; Printf.sprintf "%s/include" lib_dir ] in
+    let cflags = [ "-isystem"; Printf.sprintf "%s/include" lib_dir; "-I"; Printf.sprintf "%s/include" lib_dir ] in
     let libs =
       [ Printf.sprintf "-Wl,-rpath,%s/lib" lib_dir
       ; Printf.sprintf "-L%s/lib" lib_dir
@@ -16,27 +16,27 @@ let xla_flags () =
     in
     { C.Pkg_config.cflags; libs }
   in
-  match Caml.Sys.getenv_opt "XLA_EXTENSION_DIR" with
+  match Stdlib.Sys.getenv_opt "XLA_EXTENSION_DIR" with
   | Some lib_dir -> config ~lib_dir
   | None ->
-    let lib_dir =
-      Caml.Sys.getenv_opt "DUNE_SOURCEROOT"
-      |> Option.bind ~f:(fun prefix ->
-           let lib_dir = prefix /^ "xla_extension" in
-           if file_exists lib_dir then Some lib_dir else None)
-    in
-    let lib_dir =
-      match lib_dir with
-      | Some _ -> lib_dir
-      | None ->
-        Caml.Sys.getenv_opt "OPAM_SWITCH_PREFIX"
-        |> Option.bind ~f:(fun prefix ->
-             let lib_dir = prefix /^ "lib" /^ "libxla" in
-             if file_exists lib_dir then Some lib_dir else None)
-    in
-    (match lib_dir with
-     | Some lib_dir -> config ~lib_dir
-     | None -> empty_flags)
+     let lib_dir =
+       Stdlib.Sys.getenv_opt "DUNE_SOURCEROOT"
+       |> Option.bind ~f:(fun prefix ->
+              let lib_dir = prefix /^ "xla_extension" in
+              if file_exists lib_dir then Some lib_dir else None)
+     in
+     let lib_dir =
+       match lib_dir with
+       | Some _ -> lib_dir
+       | None ->
+          Stdlib.Sys.getenv_opt "OPAM_SWITCH_PREFIX"
+          |> Option.bind ~f:(fun prefix ->
+                 let lib_dir = prefix /^ "lib" /^ "libxla" in
+                 if file_exists lib_dir then Some lib_dir else None)
+     in
+     (match lib_dir with
+      | Some lib_dir -> config ~lib_dir
+      | None -> empty_flags)
 
 let () =
   C.main ~name:"xla-config" (fun _c ->
