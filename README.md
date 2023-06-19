@@ -18,6 +18,12 @@ wget https://github.com/elixir-nx/xla/releases/download/v0.4.4/xla_extension-x86
 tar -xzvf xla_extension-x86_64-linux-gnu-cpu.tar.gz
 ```
 
+For a Mac platform with M1/M2 (ARM64) hardware, this can be done via:
+```bash
+wget https://github.com/elixir-nx/xla/releases/download/v0.4.4/xla_extension-aarch64-darwin-cpu.tar.gz
+tar -xzvf xla_extension-aarch64-darwin-cpu.tar.gz
+```
+
 If the `xla_extension` directory is not in the main project directory, the path
 can be specified via the `XLA_EXTENSION_DIR` environment variable.
 

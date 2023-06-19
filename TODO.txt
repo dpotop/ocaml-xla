@@ -1,4 +1,13 @@
-## MACOS users on M1
+## Compilation
+To allow compilation, the XLA extension library must be downloaded
+and installed under ocaml-xla/xla_extension, as explained in the
+main README.md.
+
+Then, one must set the environment variable:
+export XLA_EXTENSION_DIR=/Users/dpotop/github/ReactiveXLA/ocaml-xla/xla_extension/
+(or whatever on your machine).
+
+## Macos users on M1
 * set DYLD_LIBRARY_PATH to include the xla_extension/lib folder
 * legalize the dynamic library in the system preferences/security and privacy tab (once it has been rejected once, it appears there).
 
@@ -12,5 +21,5 @@ The ```config``` file has been created and must be given in argument to dune, or
 
 ```dune exec --config-file ./config examples/jacky.exe```
 
-## example compilation config (examples/dune)
+## Example compilation config (examples/dune)
 I have added my new example to the file and I have modified the compilation options to avoid raising an error upon warnings, cf. https://stackoverflow.com/questions/57120927/how-to-disable-error-warning-66-unused-open-in-dune
