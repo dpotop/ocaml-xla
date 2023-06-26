@@ -551,7 +551,7 @@ module Op = struct
   
   (* DPB:
      Found the definition of the op in
-     xla_extension/include/tensorflow/compiler/xla/client/xha_builder.h
+     xla_extension/include/tensorflow/compiler/xla/client/xla_builder.h
      For now I set padding to Valid, but more options are available under
      xla_extension/include/tensorflow/compiler/xla/client/padding.h
      There are modifications also in bindings.ml and xla_stubs.h, xla_stubs.cpp *)
