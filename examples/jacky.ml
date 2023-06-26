@@ -334,17 +334,18 @@ let () =
   (* let root = Op.div (Op.r0_f32 1.0 ~builder) (Op.r0_f32 2.0 ~builder) in *)
   
 
-  
+  let builder = Xla.Builder.create ~name:"exe1" in
   let exe1 =
-    let builder = Xla.Builder.create ~name:"exe1" in
     let root = Op.div (Op.r0_f32 1.0 ~builder) (Op.parameter "tokens" ~id:0 ~ty:F32 ~dims:[| |] ~builder) in
     let computation = Xla.Computation.build ~root in
     Xla.Executable.compile client computation
+
   and exe2 =
-    let builder = Xla.Builder.create ~name:"exe2" in
+    (* let builder = Xla.Builder.create ~name:"exe2" in *)
     let root = Op.add (Op.r0_f32 1.0 ~builder) (Op.parameter "tokens" ~id:0 ~ty:F32 ~dims:[| |] ~builder) in
     let computation = Xla.Computation.build ~root in
     Xla.Executable.compile client computation
+
   in
   
   for i = 1 to 10 do
