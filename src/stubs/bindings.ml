@@ -214,6 +214,14 @@ module C (F : Cstubs.FOREIGN) = struct
 
     let reshape = foreign "op_reshape" (t @-> size_t @-> ptr int64_t @-> returning t)
     let broadcast = foreign "op_broadcast" (t @-> size_t @-> ptr int64_t @-> returning t)
+    
+  (* DPB:
+     Found the definition of the op in
+     xla_extension/include/tensorflow/compiler/xla/client/xla_builder.h
+     For now I set padding to Valid, but more options are available under
+     xla_extension/include/tensorflow/compiler/xla/client/padding.h *)
+    let convolution = foreign "op_convolution" (t @-> t @-> size_t @-> ptr int64_t @-> returning t)
+
 
     let broadcast_in_dim =
       foreign

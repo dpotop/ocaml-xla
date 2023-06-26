@@ -11,6 +11,7 @@
 #include "tensorflow/compiler/xla/client/lib/constants.h"
 #include "tensorflow/compiler/xla/client/lib/matrix.h"
 #include "tensorflow/compiler/xla/client/xla_builder.h"
+#include "tensorflow/compiler/xla/client/padding.h"
 #include "tensorflow/compiler/xla/literal_util.h"
 #include "tensorflow/compiler/xla/pjrt/gpu/gpu_helpers.h"
 #include "tensorflow/compiler/xla/pjrt/gpu/se_gpu_pjrt_client.h"
@@ -152,6 +153,12 @@ xla_op op_min_value(const xla_builder, int);
 xla_op op_max_value(const xla_builder, int);
 xla_op op_reshape(const xla_op, size_t, const int64_t *);
 xla_op op_broadcast(const xla_op, size_t, const int64_t *);
+  /* DPB:
+     Found the definition of the op in
+     xla_extension/include/tensorflow/compiler/xla/client/xha_builder.h
+     For now I set padding to Valid, but more options are available under
+     xla_extension/include/tensorflow/compiler/xla/client/padding.h */
+  xla_op op_convolution(const xla_op lhs, const xla_op rhs, size_t wsize, const int64_t *ws);
 xla_op op_broadcast_in_dim(const xla_op, size_t, const int64_t *, size_t,
                            const int64_t *);
 xla_op op_collapse(const xla_op, size_t, const int64_t *);

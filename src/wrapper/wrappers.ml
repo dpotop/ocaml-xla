@@ -548,6 +548,25 @@ module Op = struct
     in
     keep_alive dims;
     of_ptr ptr ~builder:t.builder
+  
+  (* DPB:
+     Found the definition of the op in
+     xla_extension/include/tensorflow/compiler/xla/client/xha_builder.h
+     For now I set padding to Valid, but more options are available under
+     xla_extension/include/tensorflow/compiler/xla/client/padding.h
+     There are modifications also in bindings.ml and xla_stubs.h, xla_stubs.cpp *)
+  let convolution lhs rhs ~strides =
+    let strides = carray_i64 strides in
+    let t =
+      W.Op.convolution
+        lhs.ptr
+        rhs.ptr
+        (CArray.length strides |> Unsigned.Size_t.of_int)
+        (CArray.start strides)
+      |> of_ptr ~builder:lhs.builder
+    in
+    keep_alive strides;
+    t
 
   let broadcast_in_dim t ~out_dims ~broadcast_dims =
     let out_dims = carray_i64 out_dims in

@@ -125,6 +125,13 @@ module Op : sig
   val einsum1 : t -> string -> t
   val reshape : t -> dims:int array -> t
   val broadcast : t -> dims:int array -> t
+  (* DPB:	
+     Found the definition of the op in
+     xla_extension/include/tensorflow/compiler/xla/client/xha_builder.h
+     For now I set padding to Valid, but more options are available under
+     xla_extension/include/tensorflow/compiler/xla/client/padding.h
+     There are modifications also in bindings.ml and xla_stubs.h, xla_stubs.cpp *)
+  val convolution : t -> t -> strides:int array -> t
   val broadcast_in_dim : t -> out_dims:int array -> broadcast_dims:int array -> t
   val collapse : t -> dim_indexes:int array -> t
   val transpose : t -> dim_indexes:int array -> t

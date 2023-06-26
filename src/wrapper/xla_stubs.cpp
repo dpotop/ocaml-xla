@@ -604,6 +604,17 @@ xla_op op_broadcast(const xla_op arg, size_t dsize, const int64_t *ds) {
   END_PROTECT_OP(arg)
 }
 
+/* DPB:
+   Found the definition of the op in
+   xla_extension/include/tensorflow/compiler/xla/client/xla_builder.h
+   For now I set padding to Valid, but more options are available under
+   xla_extension/include/tensorflow/compiler/xla/client/padding.h */
+xla_op op_convolution(const xla_op lhs, const xla_op rhs, size_t strides_size, const int64_t *strides) {
+  BEGIN_PROTECT_OP
+    return new XlaOp(Conv(*lhs,*rhs,absl::Span<const int64_t>(strides,strides_size), Padding::kValid));
+  END_PROTECT_OP(lhs)
+}
+
 xla_op op_broadcast_in_dim(const xla_op arg, size_t out_dsize,
                            const int64_t *out_ds, size_t broadcast_dsize,
                            const int64_t *broadcast_ds) {

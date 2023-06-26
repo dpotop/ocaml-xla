@@ -1,3 +1,16 @@
+; This makes the compiler not raise an error
+; upon various warning conditions.
+; Cf. https://stackoverflow.com/questions/57120927/how-to-disable-error-warning-66-unused-open-in-dune
+(env
+  (dev
+    (flags
+      (:standard -w -66)
+      (:standard -w -26)
+      (:standard -w -32)
+    )
+  )
+)
+
 (library
   (name xla)
   (public_name xla)
