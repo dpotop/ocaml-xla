@@ -27,6 +27,12 @@ tar -xzvf xla_extension-aarch64-darwin-cpu.tar.gz
 If the `xla_extension` directory is not in the main project directory, the path
 can be specified via the `XLA_EXTENSION_DIR` environment variable.
 
+Furthermore, on a Mac platform the path to the dynamic library must be specified by updating the environment variable ```DYLD_LIBRARY_PATH```as follows:
+```
+export DYLD_LIBRARY_PATH=/Users/dpotop/github/ReactiveXLA/ocaml-xla/xla_extension/lib
+```
+
+
 ## Compilation and execution instructions for MacOS on ARM64 (M1/M2) hardware
 The ```DYLD_LIBRARY_PATH```must be set to include  the ```xla_extension/lib``` folder.
 Then, at the first call, execution will fail, as the dynamic library is not legalized.
