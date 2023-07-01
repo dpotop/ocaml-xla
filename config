@@ -1,9 +1,14 @@
 (lang dune 3.1)
-; This file must be given in argument to dune, or placed
-; in a location I did not yet identified. 
-; example: dune exec --config-file ./config examples/jacky.exe
-
-
+; This is a dune global configuration file that tells dune
+; two things:
+; - to print all commands as it executes them
+; - to use all the cores of the computer
+; I should either place it in the global location (but on Mac
+; I do not know it, or specified in the dune command as:
+;   dune build --config-file ./config compiler/main.exe
+; For more information:
+;   https://dune.readthedocs.io/en/stable/dune-files.html#config
+; Compilation will still function without it, however. :)
 
 ; print all commands it executes 
 ; cf. https://dune.readthedocs.io/en/stable/dune-files.html

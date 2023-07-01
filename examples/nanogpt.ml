@@ -252,6 +252,11 @@ module CausalSelfAttention = struct
               ~builder)
     in
     let mask =
+      (* DPB: I guess the lower_triangle below is doing the forward
+       * propagation magic. But it's funny: the computation is not causal.
+       * At each cycle the window of text advances, but nothing forces this
+       * implementation to preserve the elements of the window before the
+       * last one. :) *)
       Op.r0_i32 1 ~builder
       |> Op.broadcast ~dims:[| t_sz; t_sz |]
       |> Op.lower_triangle
